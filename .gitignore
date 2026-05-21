@@ -1,0 +1,28 @@
+# Local environments
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Generated experiment outputs
+artifacts/
+
+# Python caches and test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# System/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs
+*.log

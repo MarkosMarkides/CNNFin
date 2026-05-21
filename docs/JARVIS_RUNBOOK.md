@@ -1,0 +1,169 @@
+# Jarvis Runbook
+
+This is the intended full workflow for running CNNFin on Jarvis Labs or another GPU machine.
+
+## 1. Clone Or Upload The Project
+
+Start from the cleaned project directory containing:
+
+```text
+cnnfin/
+configs/
+exploration/
+feature_engineering/
+image_generation/
+tests/
+requirements.txt
+```
+
+Generated artifacts are not required at the start unless you are resuming a previous run.
+
+## 2. Create Environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+If your Jarvis image has a specific CUDA setup, install the matching PyTorch/Torchvision wheels first, then install `requirements.txt`.
+
+## 3. Validate Setup
+
+```bash
+./.venv/bin/python -m unittest discover -s tests -v
+```
+
+All tests should pass before launching long jobs.
+
+## 4. Download Data
+
+Open and run:
+
+```text
+exploration/data_fetching.ipynb
+```
+
+Keep:
+
+```python
+FORCE_DOWNLOAD = False
+```
+
+unless you intentionally want to redownload existing files.
+
+Expected output:
+
+```text
+artifacts/cnnfin_5m/raw_candles/
+```
+
+## 5. Build Dataset And Images
+
+Open:
+
+```text
+exploration/image_builder.ipynb
+```
+
+First run with:
+
+```python
+RUN_FULL_IMAGE_BUILD = False
+```
+
+Inspect the preview images.
+
+When ready for full training, set:
+
+```python
+RUN_FULL_IMAGE_BUILD = True
+```
+
+Expected full output:
+
+```text
+artifacts/cnnfin_5m/processed/merged_df.pkl
+artifacts/cnnfin_5m/processed/samples.pkl
+artifacts/cnnfin_5m/processed/image_manifest.pkl
+artifacts/cnnfin_5m/images/
+```
+
+## 6. Train Numeric Baselines
+
+Open and run:
+
+```text
+exploration/ML_models.ipynb
+```
+
+Keep:
+
+```python
+DEBUG_MODE = False
+```
+
+The notebook trains Logistic Regression, XGBoost, MLP, and LSTM on the same sample IDs and same source information used by the CNN.
+
+Expected outputs:
+
+```text
+artifacts/cnnfin_5m/results/logistic_regression/
+artifacts/cnnfin_5m/results/xgboost/
+artifacts/cnnfin_5m/results/mlp/
+artifacts/cnnfin_5m/results/numeric_lstm/
+artifacts/cnnfin_5m/results/ml_model_summary.pkl
+```
+
+## 7. Train CNN
+
+Open and run:
+
+```text
+exploration/cnn_builder.ipynb
+```
+
+Keep:
+
+```python
+DEBUG_MODE = False
+```
+
+The notebook trains EfficientNet-B0 with staged fine-tuning and evaluates the test set once after model selection.
+
+Expected outputs:
+
+```text
+artifacts/cnnfin_5m/models/efficientnet_b0.pt
+artifacts/cnnfin_5m/results/efficientnet_b0/
+```
+
+## 8. Collect Results
+
+Use the saved metrics files to build paper tables.
+
+Primary result:
+
+```text
+test macro-F1
+```
+
+Useful files:
+
+```text
+artifacts/cnnfin_5m/results/*/test_metrics.json
+artifacts/cnnfin_5m/results/*/test_predictions.pkl
+artifacts/cnnfin_5m/results/*/test_confusion_matrix.pkl
+```
+
+## 9. Smoke Test Option
+
+Before full runs, both model notebooks support:
+
+```python
+DEBUG_MODE = True
+```
+
+Use this only to check that the notebook executes. Do not use debug outputs for research conclusions.
+
