@@ -1,4 +1,4 @@
-"""CNNFin research pipeline for 5-minute image-vs-tabular experiments."""
+"""CNNFin research pipeline for image-vs-tabular financial ML experiments."""
 
 from cnnfin.config import ExperimentConfig, load_config
 

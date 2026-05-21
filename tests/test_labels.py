@@ -10,7 +10,7 @@ def frame(highs, lows):
     n = len(highs)
     return pd.DataFrame(
         {
-            "Open time": pd.date_range("2021-01-01", periods=n, freq="5min", tz="UTC"),
+            "Open time": pd.date_range("2021-01-01", periods=n, freq="1h", tz="UTC"),
             "Open": [100.0] * n,
             "High": highs,
             "Low": lows,

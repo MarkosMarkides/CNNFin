@@ -13,8 +13,8 @@ from cnnfin.utils import ensure_dir
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the CNNFin 5m image-vs-tabular experiment.")
-    parser.add_argument("--config", default="configs/cnnfin_5m.yaml", help="Path to experiment YAML config.")
+    parser = argparse.ArgumentParser(description="Run the CNNFin image-vs-tabular experiment.")
+    parser.add_argument("--config", default="configs/cnnfin_1h.yaml", help="Path to experiment YAML config.")
     parser.add_argument(
         "--stage",
         default="all",

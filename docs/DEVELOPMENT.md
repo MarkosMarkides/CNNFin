@@ -74,7 +74,7 @@ On GPU machines, PyTorch installation may depend on the CUDA version of the base
 Model notebooks require:
 
 ```text
-artifacts/cnnfin_5m/processed/image_manifest.pkl
+artifacts/cnnfin_1h/processed/image_manifest.pkl
 ```
 
 If it is missing, run `image_builder.ipynb` with:
@@ -96,7 +96,7 @@ exploration/data_fetching.ipynb
 The notebooks search upward for:
 
 ```text
-configs/cnnfin_5m.yaml
+configs/cnnfin_1h.yaml
 ```
 
 They should work from the repo root or from inside `exploration/`.
@@ -111,9 +111,9 @@ For model notebooks, use `DEBUG_MODE = True` only to verify execution, not to pr
 
 Check:
 
-- `configs/cnnfin_5m.yaml`
-- `artifacts/cnnfin_5m/experiment_config.yaml`
-- `artifacts/cnnfin_5m/processed/feature_columns.json`
+- `configs/cnnfin_1h.yaml`
+- `artifacts/cnnfin_1h/experiment_config.yaml`
+- `artifacts/cnnfin_1h/processed/feature_columns.json`
 - random seed in config
 - whether images were regenerated after feature/config changes
 

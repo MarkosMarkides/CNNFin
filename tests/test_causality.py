@@ -13,7 +13,7 @@ class CausalityTest(unittest.TestCase):
         rows = 140
         base = pd.DataFrame(
             {
-                "Open time": pd.date_range("2021-01-01", periods=rows, freq="5min", tz="UTC"),
+                "Open time": pd.date_range("2021-01-01", periods=rows, freq="1h", tz="UTC"),
                 "Open": np.linspace(100, 120, rows),
                 "High": np.linspace(101, 121, rows),
                 "Low": np.linspace(99, 119, rows),

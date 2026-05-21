@@ -274,7 +274,7 @@ def _load_raw_symbol(config: ExperimentConfig, symbol: str) -> pd.DataFrame:
 
 
 def align_market_data(config: ExperimentConfig) -> pd.DataFrame:
-    """Align target and altcoin candles on target 5-minute timestamps."""
+    """Align target and altcoin candles on target timestamps."""
 
     freq = interval_to_pandas_freq(config.interval)
     target = _load_raw_symbol(config, config.target_symbol).copy()
@@ -324,12 +324,12 @@ def align_market_data(config: ExperimentConfig) -> pd.DataFrame:
     }
     write_json(report, config.artifact_path("reports", "data_integrity_report.json"))
     ensure_dir(config.artifact_path("processed"))
-    aligned.to_pickle(config.artifact_path("processed", "aligned_5m.pkl"))
+    aligned.to_pickle(config.artifact_path("processed", f"aligned_{config.interval}.pkl"))
     return aligned
 
 
 def load_aligned_market_data(config: ExperimentConfig) -> pd.DataFrame:
-    path = config.artifact_path("processed", "aligned_5m.pkl")
+    path = config.artifact_path("processed", f"aligned_{config.interval}.pkl")
     if not path.exists():
         return align_market_data(config)
     return pd.read_pickle(path)

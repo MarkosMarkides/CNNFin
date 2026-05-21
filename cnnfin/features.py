@@ -290,7 +290,7 @@ def build_merged_df(config: ExperimentConfig) -> pd.DataFrame:
     aligned["Open time"] = pd.to_datetime(aligned["Open time"], utc=True)
     aligned = _add_target_symbol_aliases(aligned, config)
 
-    print("Applying IndicatorFactory.apply_all to aligned 5m data")
+    print(f"Applying IndicatorFactory.apply_all to aligned {config.interval} data")
     indicator_output = IndicatorFactory.apply_all(aligned).copy()
     indicator_output["Open time"] = pd.to_datetime(indicator_output["Open time"], utc=True)
     indicator_cols = [c for c in indicator_output.columns if c not in aligned.columns]
@@ -329,7 +329,7 @@ def build_merged_df(config: ExperimentConfig) -> pd.DataFrame:
     model_cols = _model_feature_columns(merged, config)
     processed_dir = ensure_dir(config.artifact_path("processed"))
     merged.to_pickle(processed_dir / "merged_df.pkl")
-    merged.to_pickle(processed_dir / "features_5m.pkl")
+    merged.to_pickle(processed_dir / f"features_{config.interval}.pkl")
     stale_csv = processed_dir / "merged_df.csv"
     if stale_csv.exists():
         stale_csv.unlink()
@@ -384,7 +384,7 @@ def build_merged_df(config: ExperimentConfig) -> pd.DataFrame:
 
 
 def load_feature_table(config: ExperimentConfig) -> pd.DataFrame:
-    path = config.artifact_path("processed", "features_5m.pkl")
+    path = config.artifact_path("processed", f"features_{config.interval}.pkl")
     if not path.exists():
         return build_feature_table(config)
     return pd.read_pickle(path)

@@ -6,10 +6,10 @@ CNNFin compares image and numeric models on the same prediction task.
 
 All models use the same samples and the same source information.
 
-- CNN uses the PNG image built from a 30-candle source window.
+- CNN uses the PNG image built from a 30 one-hour candle source window.
 - Logistic Regression, XGBoost, and MLP use the flattened numeric version of that same 30-candle source window.
 - LSTM uses the same source window as a sequence.
-- All models use sample IDs from `artifacts/cnnfin_5m/processed/image_manifest.pkl`.
+- All models use sample IDs from `artifacts/cnnfin_1h/processed/image_manifest.pkl`.
 
 This rule is important. Numeric models should not receive additional features that the CNN image did not have.
 
@@ -18,13 +18,13 @@ This rule is important. Numeric models should not receive additional features th
 The numeric source surface is defined in:
 
 ```text
-artifacts/cnnfin_5m/processed/feature_columns.json
+artifacts/cnnfin_1h/processed/feature_columns.json
 ```
 
 Current model window:
 
 ```text
-30 candles x 26 source features
+30 one-hour candles x 26 source features
 ```
 
 Tabular models receive:
@@ -93,13 +93,13 @@ Model selection uses validation macro-F1.
 Model artifacts are stored in:
 
 ```text
-artifacts/cnnfin_5m/models/
+artifacts/cnnfin_1h/models/
 ```
 
 Metrics and predictions are stored in:
 
 ```text
-artifacts/cnnfin_5m/results/{model_name}/
+artifacts/cnnfin_1h/results/{model_name}/
 ```
 
 Expected model names include:
@@ -122,4 +122,3 @@ Each model reports:
 - bootstrap 95% confidence interval for test macro-F1
 
 The primary comparison metric is test macro-F1.
-

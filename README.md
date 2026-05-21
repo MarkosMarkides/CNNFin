@@ -6,13 +6,13 @@ The research question is:
 
 > If market data is represented as structured images instead of only numerical features, can a CNN improve 3-class BTCUSDT directional prediction versus classical numeric ML baselines?
 
-The experiment predicts 5-minute BTCUSDT triple-barrier outcomes using Binance candles from 2021 through 2025. The primary metric is test macro-F1 on the untouched 2025 test set.
+The experiment predicts 1-hour BTCUSDT triple-barrier outcomes using Binance candles from 2021 through 2025. The primary metric is test macro-F1 on the untouched 2025 test set.
 
 ## Current Experiment
 
 - Target: `BTCUSDT`
 - Context symbols: `ADAUSDT`, `BNBUSDT`, `ETHUSDT`, `LINKUSDT`, `LTCUSDT`, `SOLUSDT`, `TRXUSDT`, `XLMUSDT`, `XRPUSDT`
-- Candle interval: 5 minutes
+- Candle interval: 1 hour
 - Date range: `2021-01-01T00:00:00Z` through `2026-01-01T00:00:00Z`
 - Modeling split:
   - Train: 2021-2023
@@ -22,8 +22,8 @@ The experiment predicts 5-minute BTCUSDT triple-barrier outcomes using Binance c
   - `0 = short`
   - `1 = no_trade`
   - `2 = long`
-- Label policy: 96-candle triple barrier with symmetric `1.5 * ATR_14` barriers.
-- Image window: previous 30 candles.
+- Label policy: 96 one-hour candles with symmetric `1.5 * ATR_14` barriers.
+- Image window: previous 30 one-hour candles.
 - Model/sample lookback for numeric baselines: the same 30-candle image source window.
 
 ## Install
@@ -54,12 +54,12 @@ Run the notebooks in this order:
 
 ## What Each Stage Produces
 
-- `data_fetching.ipynb`: downloads raw Binance candles into `artifacts/cnnfin_5m/raw_candles/`.
+- `data_fetching.ipynb`: downloads raw Binance candles into `artifacts/cnnfin_1h/raw_candles/`.
 - `image_builder.ipynb`: builds `merged_df.pkl`, `samples.pkl`, split sample pickles, preview images, and optionally the full image dataset plus `image_manifest.pkl`.
 - `ML_models.ipynb`: trains Logistic Regression, XGBoost, MLP, and LSTM on the exact numeric source windows used by the CNN images.
 - `cnn_builder.ipynb`: trains EfficientNet-B0 on the generated four-panel PNG images.
 
-Main outputs are written under `artifacts/cnnfin_5m/`.
+Main outputs are written under `artifacts/cnnfin_1h/`.
 
 ## Fair Comparison Rule
 
@@ -68,7 +68,7 @@ All models use the same samples and the same source information.
 - CNN: uses one PNG image generated from the 30-candle source window.
 - Logistic Regression, XGBoost, MLP: use the flattened numeric version of that same 30-candle source window.
 - LSTM: uses that same source window as a sequence.
-- All model notebooks use sample IDs from `artifacts/cnnfin_5m/processed/image_manifest.pkl`.
+- All model notebooks use sample IDs from `artifacts/cnnfin_1h/processed/image_manifest.pkl`.
 
 This avoids giving numeric models extra information that was not available to the CNN image model.
 
@@ -89,7 +89,7 @@ This avoids giving numeric models extra information that was not available to th
 - `cnnfin/`: importable pipeline modules.
 - `feature_engineering/indicators.py`: technical indicators used by the dataset builder.
 - `image_generation/image_generator.py`: four-panel image renderer.
-- `configs/cnnfin_5m.yaml`: experiment configuration.
+- `configs/cnnfin_1h.yaml`: experiment configuration.
 - `exploration/`: runnable notebooks.
 - `tests/`: unit and smoke tests.
 
@@ -98,4 +98,3 @@ This avoids giving numeric models extra information that was not available to th
 ```bash
 ./.venv/bin/python -m unittest discover -s tests -v
 ```
-

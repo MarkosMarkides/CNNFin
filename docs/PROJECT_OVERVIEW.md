@@ -35,7 +35,7 @@ The altcoin context is used in the image divergence panel and in the numeric mod
 ## Time Setup
 
 - Exchange/source: Binance historical candles
-- Interval: 5 minutes
+- Interval: 1 hour
 - Start: `2021-01-01T00:00:00Z`
 - End: `2026-01-01T00:00:00Z`
 - Test year: 2025
@@ -66,5 +66,4 @@ The model predicts the triple-barrier label for a sample time `t`:
 - `1 = no_trade`
 - `2 = long`
 
-The label uses the future 96 candles after `t`; model inputs use only data at or before `t`.
-
+The label uses the future 96 one-hour candles after `t`; model inputs use only data at or before `t`.

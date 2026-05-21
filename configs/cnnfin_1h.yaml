@@ -1,5 +1,5 @@
-experiment_name: cnnfin_5m
-artifact_dir: artifacts/cnnfin_5m
+experiment_name: cnnfin_1h
+artifact_dir: artifacts/cnnfin_1h
 
 target_symbol: BTCUSDT
 alt_symbols:
@@ -13,8 +13,8 @@ alt_symbols:
   - XLMUSDT
   - XRPUSDT
 
-interval: 5m
-interval_minutes: 5
+interval: 1h
+interval_minutes: 60
 start_date: "2021-01-01T00:00:00Z"
 end_date: "2026-01-01T00:00:00Z"
 

@@ -3,19 +3,19 @@
 All generated experiment outputs live under:
 
 ```text
-artifacts/cnnfin_5m/
+artifacts/cnnfin_1h/
 ```
 
 The artifact directory is configured in:
 
 ```text
-configs/cnnfin_5m.yaml
+configs/cnnfin_1h.yaml
 ```
 
 ## Top-Level Artifact Map
 
 ```text
-artifacts/cnnfin_5m/
+artifacts/cnnfin_1h/
   raw_candles/
   raw_zips/
   processed/
@@ -32,7 +32,7 @@ artifacts/cnnfin_5m/
 Contains one pickle per symbol:
 
 ```text
-{SYMBOL}_5m.pkl
+{SYMBOL}_1h.pkl
 ```
 
 These are downloaded by `data_fetching.ipynb`.
@@ -48,9 +48,9 @@ This directory is useful for avoiding repeated network downloads.
 Important processed files:
 
 ```text
-aligned_5m.pkl
+aligned_1h.pkl
 merged_df.pkl
-features_5m.pkl
+features_1h.pkl
 samples.pkl
 train_samples.pkl
 val_samples.pkl

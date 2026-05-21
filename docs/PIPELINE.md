@@ -12,7 +12,7 @@ CNNFin is organized as a staged pipeline. The notebooks are the Jarvis-friendly 
 ## Data Flow
 
 ```text
-Binance 5m candles
+Binance 1h candles
   -> raw candle pickles
   -> aligned multi-symbol market table
   -> IndicatorFactory.apply_all indicators
@@ -30,13 +30,13 @@ Binance 5m candles
 It downloads all configured symbols and stores raw candle pickles in:
 
 ```text
-artifacts/cnnfin_5m/raw_candles/
+artifacts/cnnfin_1h/raw_candles/
 ```
 
 It also uses ZIP cache files under:
 
 ```text
-artifacts/cnnfin_5m/raw_zips/
+artifacts/cnnfin_1h/raw_zips/
 ```
 
 ## Dataset Stage
@@ -55,13 +55,13 @@ artifacts/cnnfin_5m/raw_zips/
 The main full table is:
 
 ```text
-artifacts/cnnfin_5m/processed/merged_df.pkl
+artifacts/cnnfin_1h/processed/merged_df.pkl
 ```
 
 The clean modeling subset is:
 
 ```text
-artifacts/cnnfin_5m/processed/samples.pkl
+artifacts/cnnfin_1h/processed/samples.pkl
 ```
 
 ## Image Stage
@@ -83,13 +83,13 @@ RUN_FULL_IMAGE_BUILD = True
 Full images are saved under:
 
 ```text
-artifacts/cnnfin_5m/images/{split}/{sample_id}.png
+artifacts/cnnfin_1h/images/{split}/{sample_id}.png
 ```
 
 The full image manifest is:
 
 ```text
-artifacts/cnnfin_5m/processed/image_manifest.pkl
+artifacts/cnnfin_1h/processed/image_manifest.pkl
 ```
 
 ## Baseline Model Stage
@@ -117,7 +117,7 @@ The notebook uses staged fine-tuning:
 Each model writes predictions and metrics under:
 
 ```text
-artifacts/cnnfin_5m/results/{model_name}/
+artifacts/cnnfin_1h/results/{model_name}/
 ```
 
 Metrics include:

@@ -122,7 +122,7 @@ def build_label_table(config: ExperimentConfig) -> pd.DataFrame:
         barrier_multiple=config.barrier_multiple,
     )
     ensure_dir(config.artifact_path("processed"))
-    labels.to_pickle(config.artifact_path("processed", "labels_5m.pkl"))
+    labels.to_pickle(config.artifact_path("processed", f"labels_{config.interval}.pkl"))
 
     status_counts = labels["label_status"].value_counts(dropna=False).to_dict()
     class_counts = labels["label"].dropna().astype(int).value_counts().sort_index().to_dict()
@@ -140,7 +140,7 @@ def build_label_table(config: ExperimentConfig) -> pd.DataFrame:
 
 
 def load_label_table(config: ExperimentConfig) -> pd.DataFrame:
-    path = config.artifact_path("processed", "labels_5m.pkl")
+    path = config.artifact_path("processed", f"labels_{config.interval}.pkl")
     if not path.exists():
         return build_label_table(config)
     return pd.read_pickle(path)

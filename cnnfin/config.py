@@ -9,10 +9,10 @@ import yaml
 
 @dataclass
 class ExperimentConfig:
-    """Single source of truth for the CNNFin 5m experiment."""
+    """Single source of truth for the CNNFin experiment."""
 
-    experiment_name: str = "cnnfin_5m"
-    artifact_dir: str = "artifacts/cnnfin_5m"
+    experiment_name: str = "cnnfin_1h"
+    artifact_dir: str = "artifacts/cnnfin_1h"
 
     target_symbol: str = "BTCUSDT"
     alt_symbols: list[str] = field(
@@ -28,8 +28,8 @@ class ExperimentConfig:
             "XRPUSDT",
         ]
     )
-    interval: str = "5m"
-    interval_minutes: int = 5
+    interval: str = "1h"
+    interval_minutes: int = 60
     start_date: str = "2021-01-01T00:00:00Z"
     end_date: str = "2026-01-01T00:00:00Z"
 

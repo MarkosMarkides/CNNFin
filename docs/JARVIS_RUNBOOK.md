@@ -56,7 +56,7 @@ unless you intentionally want to redownload existing files.
 Expected output:
 
 ```text
-artifacts/cnnfin_5m/raw_candles/
+artifacts/cnnfin_1h/raw_candles/
 ```
 
 ## 5. Build Dataset And Images
@@ -84,10 +84,10 @@ RUN_FULL_IMAGE_BUILD = True
 Expected full output:
 
 ```text
-artifacts/cnnfin_5m/processed/merged_df.pkl
-artifacts/cnnfin_5m/processed/samples.pkl
-artifacts/cnnfin_5m/processed/image_manifest.pkl
-artifacts/cnnfin_5m/images/
+artifacts/cnnfin_1h/processed/merged_df.pkl
+artifacts/cnnfin_1h/processed/samples.pkl
+artifacts/cnnfin_1h/processed/image_manifest.pkl
+artifacts/cnnfin_1h/images/
 ```
 
 ## 6. Train Numeric Baselines
@@ -109,11 +109,11 @@ The notebook trains Logistic Regression, XGBoost, MLP, and LSTM on the same samp
 Expected outputs:
 
 ```text
-artifacts/cnnfin_5m/results/logistic_regression/
-artifacts/cnnfin_5m/results/xgboost/
-artifacts/cnnfin_5m/results/mlp/
-artifacts/cnnfin_5m/results/numeric_lstm/
-artifacts/cnnfin_5m/results/ml_model_summary.pkl
+artifacts/cnnfin_1h/results/logistic_regression/
+artifacts/cnnfin_1h/results/xgboost/
+artifacts/cnnfin_1h/results/mlp/
+artifacts/cnnfin_1h/results/numeric_lstm/
+artifacts/cnnfin_1h/results/ml_model_summary.pkl
 ```
 
 ## 7. Train CNN
@@ -135,8 +135,8 @@ The notebook trains EfficientNet-B0 with staged fine-tuning and evaluates the te
 Expected outputs:
 
 ```text
-artifacts/cnnfin_5m/models/efficientnet_b0.pt
-artifacts/cnnfin_5m/results/efficientnet_b0/
+artifacts/cnnfin_1h/models/efficientnet_b0.pt
+artifacts/cnnfin_1h/results/efficientnet_b0/
 ```
 
 ## 8. Collect Results
@@ -152,9 +152,9 @@ test macro-F1
 Useful files:
 
 ```text
-artifacts/cnnfin_5m/results/*/test_metrics.json
-artifacts/cnnfin_5m/results/*/test_predictions.pkl
-artifacts/cnnfin_5m/results/*/test_confusion_matrix.pkl
+artifacts/cnnfin_1h/results/*/test_metrics.json
+artifacts/cnnfin_1h/results/*/test_predictions.pkl
+artifacts/cnnfin_1h/results/*/test_confusion_matrix.pkl
 ```
 
 ## 9. Smoke Test Option

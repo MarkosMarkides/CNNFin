@@ -4,12 +4,12 @@ This document describes the tabular data construction and label policy.
 
 ## Raw Candles
 
-Raw data comes from Binance 5-minute OHLCV candles.
+Raw data comes from Binance 1-hour OHLCV candles.
 
 Each symbol is saved as a pickle:
 
 ```text
-artifacts/cnnfin_5m/raw_candles/{SYMBOL}_5m.pkl
+artifacts/cnnfin_1h/raw_candles/{SYMBOL}_1h.pkl
 ```
 
 The key time column is `Open time`.
@@ -37,7 +37,7 @@ BTC is the label target, so BTC OHLC data is not fabricated. Altcoin close and v
 The aligned market table is saved as:
 
 ```text
-artifacts/cnnfin_5m/processed/aligned_5m.pkl
+artifacts/cnnfin_1h/processed/aligned_1h.pkl
 ```
 
 ## Canonical Merged DataFrame
@@ -45,7 +45,7 @@ artifacts/cnnfin_5m/processed/aligned_5m.pkl
 The canonical full table is:
 
 ```text
-artifacts/cnnfin_5m/processed/merged_df.pkl
+artifacts/cnnfin_1h/processed/merged_df.pkl
 ```
 
 It contains:
@@ -70,7 +70,7 @@ The image heatmap uses 13 configured indicator columns from this output. Those a
 
 ## Label Policy
 
-Each sample at time `t` uses the future 96 candles:
+Each sample at time `t` uses the future 96 one-hour candles:
 
 ```text
 [t+1, t+96]
@@ -111,12 +111,11 @@ This prevents leakage across missing-candle gaps and split boundaries.
 Processed sample files are saved as pickles:
 
 ```text
-artifacts/cnnfin_5m/processed/samples.pkl
-artifacts/cnnfin_5m/processed/train_samples.pkl
-artifacts/cnnfin_5m/processed/val_samples.pkl
-artifacts/cnnfin_5m/processed/test_samples.pkl
-artifacts/cnnfin_5m/processed/train_val_samples.pkl
+artifacts/cnnfin_1h/processed/samples.pkl
+artifacts/cnnfin_1h/processed/train_samples.pkl
+artifacts/cnnfin_1h/processed/val_samples.pkl
+artifacts/cnnfin_1h/processed/test_samples.pkl
+artifacts/cnnfin_1h/processed/train_val_samples.pkl
 ```
 
 Model notebooks use `image_manifest.pkl` after images exist, because that is the exact sample set available to the CNN.
-

@@ -1,4 +1,4 @@
-# CNNFin 5m Experiment
+# CNNFin 1h Experiment
 
 This file is kept as a short pointer for compatibility with earlier notes.
 

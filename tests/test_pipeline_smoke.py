@@ -16,7 +16,7 @@ from cnnfin.samples import build_samples
 def synthetic_candles(symbol: str, periods_per_year: int = 360) -> pd.DataFrame:
     frames = []
     for year, offset in [(2021, 0), (2024, 500), (2025, 1000)]:
-        ts = pd.date_range(f"{year}-01-01", periods=periods_per_year, freq="5min", tz="UTC")
+        ts = pd.date_range(f"{year}-01-01", periods=periods_per_year, freq="1h", tz="UTC")
         x = np.arange(periods_per_year, dtype=float)
         base = 100.0 + offset + 0.05 * x + 2.0 * np.sin(x / 6.0)
         if symbol != "BTCUSDT":
@@ -35,7 +35,7 @@ def synthetic_candles(symbol: str, periods_per_year: int = 360) -> pd.DataFrame:
                     "Low": low,
                     "Close": close,
                     "Volume": volume,
-                    "Close time": ts + pd.Timedelta(minutes=5) - pd.Timedelta(milliseconds=1),
+                    "Close time": ts + pd.Timedelta(hours=1) - pd.Timedelta(milliseconds=1),
                     "Quote asset volume": close * volume,
                     "Number of trades": x.astype(int) + 1,
                     "Taker buy base asset volume": volume * 0.5,
@@ -51,6 +51,8 @@ class PipelineSmokeTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             config = ExperimentConfig(
                 artifact_dir=str(Path(tmp) / "artifacts"),
+                interval="1h",
+                interval_minutes=60,
                 lookback=8,
                 image_lookback=5,
                 horizon=4,

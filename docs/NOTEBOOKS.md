@@ -13,8 +13,8 @@ Run notebooks in this order:
 
 Purpose:
 
-- load `configs/cnnfin_5m.yaml`
-- download all configured 5-minute Binance candles
+- load `configs/cnnfin_1h.yaml`
+- download all configured 1-hour Binance candles
 - save raw candle pickles
 - write download verification reports
 
@@ -54,13 +54,13 @@ RUN_FULL_IMAGE_BUILD = True
 Preview images are saved to:
 
 ```text
-artifacts/cnnfin_5m/image_preview/
+artifacts/cnnfin_1h/image_preview/
 ```
 
 Full images are saved to:
 
 ```text
-artifacts/cnnfin_5m/images/
+artifacts/cnnfin_1h/images/
 ```
 
 ## `ML_models.ipynb`
@@ -70,7 +70,7 @@ Purpose:
 - load `merged_df.pkl`
 - load `feature_columns.json`
 - load `image_manifest.pkl`
-- build the exact same 30-candle numeric source windows used to create CNN images
+- build the exact same 30 one-hour candle numeric source windows used to create CNN images
 - train Logistic Regression, XGBoost, MLP, and LSTM
 - save metrics, predictions, confusion matrices, and model artifacts
 
@@ -109,7 +109,6 @@ If a notebook fails:
 
 - verify `requirements.txt` has been installed
 - verify the previous notebook stage has completed
-- verify `artifact_dir` in `configs/cnnfin_5m.yaml`
+- verify `artifact_dir` in `configs/cnnfin_1h.yaml`
 - verify `image_builder.ipynb` generated `image_manifest.pkl` before running model notebooks
 - verify paths are rooted in the repository, not the notebook directory
-
