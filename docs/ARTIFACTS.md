@@ -99,7 +99,7 @@ logistic_regression.joblib
 xgboost.joblib
 mlp.pt
 numeric_lstm.pt
-efficientnet_b0_highres.pt
+efficientnet_b0.pt
 ```
 
 Preprocessors can also be stored here, such as:

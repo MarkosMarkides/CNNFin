@@ -49,11 +49,8 @@ Each of the four panels is `224 x 224`.
 The CNN notebook resizes images to:
 
 ```yaml
-cnn_input_size: 448
-cnn_batch_size: 32
+cnn_input_size: 224
 ```
-
-This keeps each `224 x 224` panel at full generated resolution during CNN training. The shared `batch_size` remains for numeric models; `cnn_batch_size` is CNN-specific.
 
 ## Four Panels
 

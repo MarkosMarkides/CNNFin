@@ -143,7 +143,7 @@ def collect_test_results(config: ExperimentConfig) -> pd.DataFrame:
 
 def write_cnn_vs_best_baseline(config: ExperimentConfig) -> dict[str, Any] | None:
     summary = collect_test_results(config)
-    cnn_candidates = ["efficientnet_b0_highres", "efficientnet_b0"]
+    cnn_candidates = ["efficientnet_b0", "efficientnet_b0_highres"]
     available_models = set(summary["model"])
     cnn_model = next((name for name in cnn_candidates if name in available_models), None)
     if summary.empty or cnn_model is None:

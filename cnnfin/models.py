@@ -351,13 +351,13 @@ def train_image_cnn(config: ExperimentConfig) -> None:
     manifest = load_image_manifest(config)
     splits = {split: manifest[manifest["split"] == split].copy().reset_index(drop=True) for split in ["train", "val", "test"]}
 
-    model_name = "efficientnet_b0_highres"
-    cnn_batch_size = int(config.cnn_batch_size or config.batch_size)
+    model_name = "efficientnet_b0"
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
     train_transform = transforms.Compose(
         [
             transforms.Resize((config.cnn_input_size, config.cnn_input_size)),
+            transforms.RandomAffine(degrees=0, translate=(0.01, 0.01), scale=(0.98, 1.02)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ]
@@ -388,33 +388,23 @@ def train_image_cnn(config: ExperimentConfig) -> None:
     train_ds = ImageDataset(splits["train"], train_transform)
     val_ds = ImageDataset(splits["val"], eval_transform)
     test_ds = ImageDataset(splits["test"], eval_transform)
-    train_loader = DataLoader(train_ds, batch_size=cnn_batch_size, shuffle=True, num_workers=config.num_workers)
-    val_loader = DataLoader(val_ds, batch_size=cnn_batch_size, shuffle=False, num_workers=config.num_workers)
-    test_loader = DataLoader(test_ds, batch_size=cnn_batch_size, shuffle=False, num_workers=config.num_workers)
+    train_loader = DataLoader(train_ds, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
+    val_loader = DataLoader(val_ds, batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers)
+    test_loader = DataLoader(test_ds, batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers)
 
     try:
         model = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
     except Exception as exc:
         print(f"[WARN] Failed to load EfficientNet-B0 ImageNet weights ({exc}); using random initialization.")
         model = efficientnet_b0(weights=None)
-    for p in model.features.parameters():
-        p.requires_grad = False
-    for block in model.features[-2:]:
-        for p in block.parameters():
-            p.requires_grad = True
-    in_features = model.classifier[1].in_features
-    model.classifier = nn.Sequential(nn.Dropout(p=0.2), nn.Linear(in_features, 3))
+    if config.freeze_cnn_backbone:
+        for p in model.features.parameters():
+            p.requires_grad = False
+    model.classifier[1] = nn.Linear(model.classifier[1].in_features, 3)
     model = model.to(device)
 
     loss_fn = nn.CrossEntropyLoss(weight=_torch_class_weights(splits["train"]["label"].to_numpy(), device))
-    classifier_params = [p for p in model.classifier.parameters() if p.requires_grad]
-    top_block_params = [p for block in model.features[-2:] for p in block.parameters() if p.requires_grad]
-    optimizer = torch.optim.AdamW(
-        [
-            {"params": classifier_params, "lr": config.learning_rate},
-            {"params": top_block_params, "lr": 3e-5},
-        ]
-    )
+    optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=config.learning_rate)
 
     best_state = None
     best_score = -1.0

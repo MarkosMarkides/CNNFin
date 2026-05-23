@@ -143,8 +143,8 @@ The notebook trains EfficientNet-B0 with staged fine-tuning and evaluates the te
 Expected outputs:
 
 ```text
-artifacts/cnnfin_1h/models/efficientnet_b0_highres.pt
-artifacts/cnnfin_1h/results/efficientnet_b0_highres/
+artifacts/cnnfin_1h/models/efficientnet_b0.pt
+artifacts/cnnfin_1h/results/efficientnet_b0/
 ```
 
 ## 8. Collect Results

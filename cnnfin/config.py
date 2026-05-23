@@ -72,7 +72,6 @@ class ExperimentConfig:
     image_lookback: int | None = None
     image_size_each: int = 112
     cnn_input_size: int = 224
-    cnn_batch_size: int | None = None
     batch_size: int = 64
     num_epochs: int = 20
     early_stopping_patience: int = 5

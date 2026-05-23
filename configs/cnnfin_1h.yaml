@@ -60,8 +60,7 @@ bootstrap_iterations: 1000
 
 image_lookback: 30
 image_size_each: 224
-cnn_input_size: 448
-cnn_batch_size: 32
+cnn_input_size: 224
 batch_size: 64
 num_epochs: 20
 early_stopping_patience: 5

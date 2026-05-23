@@ -110,9 +110,7 @@ Expected model names include:
 - `xgboost`
 - `mlp`
 - `numeric_lstm`
-- `efficientnet_b0_highres`
-
-The current CNN run uses EfficientNet-B0 at `448 x 448`, preserving the full generated four-panel image resolution.
+- `efficientnet_b0`
 
 ## Metrics
 

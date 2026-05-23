@@ -107,7 +107,7 @@ It uses `image_manifest.pkl` as the sample source to guarantee the same sample I
 
 ## CNN Stage
 
-`cnn_builder.ipynb` trains high-resolution EfficientNet-B0 on the full PNG image dataset.
+`cnn_builder.ipynb` trains EfficientNet-B0 on the full PNG image dataset.
 
 The notebook uses staged fine-tuning:
 

@@ -99,12 +99,12 @@ Purpose:
 
 - load `image_manifest.pkl`
 - load generated PNG images
-- train high-resolution EfficientNet-B0 at `448 x 448`
+- train EfficientNet-B0
 - select checkpoint by validation macro-F1
 - evaluate once on the 2025 test set
 - save CNN metrics, predictions, confusion matrix, and checkpoint
 
-Current CNN outputs are saved as `efficientnet_b0_highres`.
+Current CNN outputs are saved as `efficientnet_b0`.
 
 Important toggle:
 
