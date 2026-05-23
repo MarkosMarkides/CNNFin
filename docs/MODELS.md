@@ -75,7 +75,7 @@ Logistic Regression, XGBoost, and MLP use a flattened `30 x 26` numeric vector.
 
 The LSTM uses a `30 x 26` sequence.
 
-The notebook evaluates both the raw numeric window and a window-normalized/return-transformed variant.
+The notebook uses only the raw numeric source window. It does not apply window normalization, so the numeric models receive the same source values that are used to render the CNN image.
 
 All preprocessing is fit on training data only. Validation is used for model selection where applicable. Test metrics are computed after training is complete.
 
@@ -110,7 +110,9 @@ Expected model names include:
 - `xgboost`
 - `mlp`
 - `numeric_lstm`
-- `efficientnet_b0`
+- `efficientnet_b0_highres`
+
+The current CNN run uses EfficientNet-B0 at `448 x 448`, preserving the full generated four-panel image resolution.
 
 ## Metrics
 

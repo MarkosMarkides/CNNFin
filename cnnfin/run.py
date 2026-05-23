@@ -105,6 +105,7 @@ def main() -> None:
         max_samples_per_split=args.max_samples_per_split,
         num_epochs=args.num_epochs,
         batch_size=args.batch_size,
+        cnn_batch_size=args.batch_size,
         bootstrap_iterations=args.bootstrap_iterations,
     )
     ensure_dir(config.artifact_path())

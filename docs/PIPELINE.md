@@ -101,18 +101,18 @@ artifacts/cnnfin_1h/processed/image_manifest.pkl
 - MLP
 - LSTM
 
-It evaluates both raw and window-normalized numeric input variants.
+It uses only the raw numeric source window so the baseline comparison stays source-equivalent with the CNN images.
 
 It uses `image_manifest.pkl` as the sample source to guarantee the same sample IDs as the CNN.
 
 ## CNN Stage
 
-`cnn_builder.ipynb` trains EfficientNet-B0 on the full PNG image dataset.
+`cnn_builder.ipynb` trains high-resolution EfficientNet-B0 on the full PNG image dataset.
 
 The notebook uses staged fine-tuning:
 
 1. train classifier head with the backbone frozen
-2. unfreeze the top EfficientNet blocks and fine-tune by validation macro-F1
+2. unfreeze only the final EfficientNet block and fine-tune gently by validation macro-F1
 
 ## Evaluation Stage
 

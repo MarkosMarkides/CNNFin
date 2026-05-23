@@ -99,7 +99,7 @@ logistic_regression.joblib
 xgboost.joblib
 mlp.pt
 numeric_lstm.pt
-efficientnet_b0.pt
+efficientnet_b0_highres.pt
 ```
 
 Preprocessors can also be stored here, such as:
@@ -131,7 +131,7 @@ training_history.pkl
 The ML baseline notebook also writes:
 
 ```text
-results/ml_model_summary.pkl
+results/ml_model_raw_summary.pkl
 ```
 
 ## `reports/`
@@ -149,4 +149,3 @@ image_report.json
 ```
 
 Reports are intended for sanity checks and reproducibility notes.
-

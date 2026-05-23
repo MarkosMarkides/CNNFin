@@ -143,13 +143,16 @@ def collect_test_results(config: ExperimentConfig) -> pd.DataFrame:
 
 def write_cnn_vs_best_baseline(config: ExperimentConfig) -> dict[str, Any] | None:
     summary = collect_test_results(config)
-    if summary.empty or "efficientnet_b0" not in set(summary["model"]):
+    cnn_candidates = ["efficientnet_b0_highres", "efficientnet_b0"]
+    available_models = set(summary["model"])
+    cnn_model = next((name for name in cnn_candidates if name in available_models), None)
+    if summary.empty or cnn_model is None:
         return None
-    baseline_rows = summary[(summary["model"] != "efficientnet_b0") & (summary["status"] == "ok")]
+    baseline_rows = summary[(~summary["model"].isin(cnn_candidates)) & (summary["status"] == "ok")]
     if baseline_rows.empty:
         return None
     best_baseline = baseline_rows.iloc[0]["model"]
-    cnn_pred = pd.read_csv(config.artifact_path("results", "efficientnet_b0", "test_predictions.csv"))
+    cnn_pred = pd.read_csv(config.artifact_path("results", cnn_model, "test_predictions.csv"))
     base_pred = pd.read_csv(config.artifact_path("results", str(best_baseline), "test_predictions.csv"))
     merged = cnn_pred[["sample_id", "y_true", "y_pred"]].merge(
         base_pred[["sample_id", "y_pred"]],
@@ -164,7 +167,7 @@ def write_cnn_vs_best_baseline(config: ExperimentConfig) -> dict[str, Any] | Non
         seed=config.seeds[0],
     )
     out = {
-        "cnn_model": "efficientnet_b0",
+        "cnn_model": cnn_model,
         "baseline_model": str(best_baseline),
         "macro_f1_difference": float(
             f1_score(merged["y_true"], merged["y_pred_cnn"], labels=LABELS, average="macro", zero_division=0)

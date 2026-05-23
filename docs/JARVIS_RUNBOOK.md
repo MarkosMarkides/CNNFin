@@ -112,7 +112,7 @@ Keep:
 DEBUG_MODE = False
 ```
 
-The notebook trains Logistic Regression, XGBoost, MLP, and LSTM on the same sample IDs and same source information used by the CNN. It evaluates raw and window-normalized numeric variants.
+The notebook trains Logistic Regression, XGBoost, MLP, and LSTM on the same sample IDs and same raw source information used by the CNN image renderer. It does not run window-normalized variants.
 
 Expected outputs:
 
@@ -121,7 +121,7 @@ artifacts/cnnfin_1h/results/logistic_regression/
 artifacts/cnnfin_1h/results/xgboost/
 artifacts/cnnfin_1h/results/mlp/
 artifacts/cnnfin_1h/results/numeric_lstm/
-artifacts/cnnfin_1h/results/ml_model_summary.pkl
+artifacts/cnnfin_1h/results/ml_model_raw_summary.pkl
 ```
 
 ## 7. Train CNN
@@ -143,8 +143,8 @@ The notebook trains EfficientNet-B0 with staged fine-tuning and evaluates the te
 Expected outputs:
 
 ```text
-artifacts/cnnfin_1h/models/efficientnet_b0.pt
-artifacts/cnnfin_1h/results/efficientnet_b0/
+artifacts/cnnfin_1h/models/efficientnet_b0_highres.pt
+artifacts/cnnfin_1h/results/efficientnet_b0_highres/
 ```
 
 ## 8. Collect Results

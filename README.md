@@ -59,7 +59,7 @@ When rebuilding from the old V1 triple-barrier target, set `CLEAN_DERIVED_ARTIFA
 - `data_fetching.ipynb`: downloads raw Binance candles into `artifacts/cnnfin_1h/raw_candles/`.
 - `image_builder.ipynb`: builds `merged_df.pkl`, `samples.pkl`, split sample pickles, preview images, and optionally the full image dataset plus `image_manifest.pkl`.
 - `ML_models_regularized_variants.ipynb`: trains Logistic Regression, XGBoost, MLP, and LSTM on the exact numeric source windows used by the CNN images.
-- `cnn_builder.ipynb`: trains EfficientNet-B0 on the generated four-panel PNG images.
+- `cnn_builder.ipynb`: trains high-resolution EfficientNet-B0 on the generated four-panel PNG images.
 
 Main outputs are written under `artifacts/cnnfin_1h/`.
 
