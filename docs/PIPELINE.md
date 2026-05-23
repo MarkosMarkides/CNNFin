@@ -112,7 +112,7 @@ It uses `image_manifest.pkl` as the sample source to guarantee the same sample I
 The notebook uses staged fine-tuning:
 
 1. train classifier head with the backbone frozen
-2. unfreeze only the final EfficientNet block and fine-tune gently by validation macro-F1
+2. unfreeze the final two EfficientNet blocks and fine-tune gently by validation macro-F1
 
 ## Evaluation Stage
 

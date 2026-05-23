@@ -399,23 +399,20 @@ def train_image_cnn(config: ExperimentConfig) -> None:
         model = efficientnet_b0(weights=None)
     for p in model.features.parameters():
         p.requires_grad = False
-    for block in model.features[-1:]:
+    for block in model.features[-2:]:
         for p in block.parameters():
             p.requires_grad = True
     in_features = model.classifier[1].in_features
-    model.classifier = nn.Sequential(nn.Dropout(p=0.4), nn.Linear(in_features, 3))
+    model.classifier = nn.Sequential(nn.Dropout(p=0.2), nn.Linear(in_features, 3))
     model = model.to(device)
 
-    loss_fn = nn.CrossEntropyLoss(
-        weight=_torch_class_weights(splits["train"]["label"].to_numpy(), device),
-        label_smoothing=0.03,
-    )
+    loss_fn = nn.CrossEntropyLoss(weight=_torch_class_weights(splits["train"]["label"].to_numpy(), device))
     classifier_params = [p for p in model.classifier.parameters() if p.requires_grad]
-    top_block_params = [p for block in model.features[-1:] for p in block.parameters() if p.requires_grad]
+    top_block_params = [p for block in model.features[-2:] for p in block.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(
         [
             {"params": classifier_params, "lr": config.learning_rate},
-            {"params": top_block_params, "lr": config.learning_rate * 0.1},
+            {"params": top_block_params, "lr": 3e-5},
         ]
     )
 
