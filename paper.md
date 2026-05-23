@@ -30,11 +30,11 @@ There is also direct prior work on converting financial data into image-like inp
 
 CNNFin also relates to work using convolutional models on structured market data. Zhang, Zohren, and Roberts (2019) show in DeepLOB that convolutional filters can exploit the spatial structure of limit order book data, although their setting is different from chart-image prediction. This supports the broader idea that market data can have useful local structure when arranged in a suitable matrix. It does not, however, prove that a four-panel chart image is optimal.
 
-The labeling and evaluation choices also need grounding. López de Prado (2018) motivates the triple-barrier method as an alternative to naive fixed-horizon labels, because it defines outcomes using profit-taking, stop-loss, and time barriers. CNNFin uses that idea to label each sample as short, no trade, or long. The evaluation uses macro-F1 because the classes are imbalanced and accuracy can hide poor minority-class behavior. Opitz (2022) discusses why macro metrics are often used when each class should matter independently. This is especially relevant here because the `no_trade` class is extremely rare; macro-F1 is informative, but it must be reported with per-class scores and confidence intervals.
+The labeling and evaluation choices also need grounding. CNNFin uses a fixed-horizon average future return rather than a trade-entry label. The future average close is compared with the current close, and train-only quantile thresholds convert that return into down, neutral, and up classes. This keeps the target aligned with the research question: predictive classification rather than trading simulation. The evaluation uses macro-F1 because each class should matter independently. Opitz (2022) discusses why macro metrics are often used when class-level performance matters more than aggregate accuracy.
 
 Finally, the CNN backbone should be treated as an engineering choice, not a contribution. EfficientNet was introduced by Tan and Le (2019) as an efficient CNN family with strong transfer-learning performance. Yosinski et al. (2014) show that transferred CNN features can help even across different tasks, but that transferability decreases when the source and target domains are distant. This is the correct way to frame ImageNet pretraining in CNNFin: useful initialization, not evidence that natural-image features are inherently financial.
 
-Taken together, the literature suggests a narrow but meaningful position. Financial image prediction, candlestick images, GAF, CNNs, and triple-barrier labeling already exist. CNNFin contributes by testing a specific crypto-oriented four-panel image representation against numerical models trained on the same sample IDs and source window. The paper is therefore best framed as an empirical representation study: it asks whether the way numerical market data is arranged changes what a model can learn.
+Taken together, the literature suggests a narrow but meaningful position. Financial image prediction, candlestick images, GAF, and CNNs already exist. CNNFin contributes by testing a specific crypto-oriented four-panel image representation against numerical models trained on the same sample IDs and source window. The paper is therefore best framed as an empirical representation study: it asks whether the way numerical market data is arranged changes what a model can learn.
 
 ## Data and Prediction Task
 
@@ -48,15 +48,21 @@ The data is split chronologically:
 | Validation | 2024 |
 | Test | 2025 |
 
-Each sample uses the previous 30 one-hour candles as input. The label is built from the following 96 one-hour candles using a triple-barrier method. The classes are:
+Each sample uses the previous 30 one-hour candles as input. The label is built from the following 12 one-hour closes. The future average close is compared with the current close using a log return:
+
+```text
+R_t = log(mean(Close_{t+1:t+12}) / Close_t)
+```
+
+The lower and upper thresholds are fitted on the training set only using the 33rd and 66th percentiles of `R_t`. The classes are:
 
 | Class | Meaning |
 |---:|---|
-| 0 | short |
-| 1 | no trade |
-| 2 | long |
+| 0 | down |
+| 1 | neutral |
+| 2 | up |
 
-The upper and lower barriers are based on ATR. If the upper barrier is hit first, the label is `long`. If the lower barrier is hit first, the label is `short`. If neither barrier is hit, the label is `no trade`.
+The validation and test labels use the same thresholds fitted from the training set. This keeps the target definition fixed after training data is observed.
 
 ## Image Representation
 
@@ -103,7 +109,7 @@ The original raw numerical baseline results were lower:
 
 Under this first comparison, the CNN improves over the best raw numerical baseline by about 25 percent in relative macro-F1.
 
-However, the label distribution is highly imbalanced. The `no_trade` class is extremely rare in the current setup, so the task is close to a short-versus-long classification problem. This must be considered when interpreting the results.
+These results are from the V1 triple-barrier setup. They should be treated as historical preliminary results until the V2 average-future-return labels are rebuilt and the models are rerun.
 
 TODO: Insert final corrected regularized-baseline table.
 
@@ -119,7 +125,7 @@ At the same time, the result should not be overstated. If improved numerical pre
 
 ## Limitations
 
-This project has several limitations. First, it evaluates prediction quality, not trading profitability. Fees, slippage, and execution constraints are not included. Second, the current triple-barrier setup produces very few `no_trade` examples, which weakens the interpretation of the three-class task. Third, the results are based on one target asset and one market period. Finally, the final robustness checks still need to be completed.
+This project has several limitations. First, it evaluates prediction quality, not trading profitability. Fees, slippage, and execution constraints are not included. Second, balanced train thresholds make the train task well formed, but validation and test distributions may still shift. Third, the results are based on one target asset and one market period. Finally, the final robustness checks still need to be completed.
 
 TODO: Add figure references for example images and confusion matrices.
 
@@ -144,8 +150,6 @@ Jin, G., & Kwon, O. (2021). Impact of chart image characteristics on stock price
 Kelly, B. T., & Xiu, D. (2023). Financial machine learning. *NBER Working Paper No. 31502*.
 
 Lo, A. W., Mamaysky, H., & Wang, J. (2000). Foundations of technical analysis: Computational algorithms, statistical inference, and empirical implementation. *Journal of Finance, 55*(4), 1705-1765.
-
-López de Prado, M. (2018). *Advances in Financial Machine Learning*. Wiley.
 
 Opitz, J. (2022). From bias and prevalence to macro F1, kappa, and MCC: A structured overview of metrics for multi-class evaluation.
 

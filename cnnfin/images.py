@@ -69,6 +69,11 @@ def generate_images(config: ExperimentConfig, *, force: bool = False) -> pd.Data
         {
             "rows": int(len(manifest)),
             "split_counts": {k: int(v) for k, v in manifest["split"].value_counts().to_dict().items()},
+            "class_counts": {
+                split: {str(k): int(v) for k, v in part["label"].value_counts().sort_index().to_dict().items()}
+                for split, part in manifest.groupby("split")
+            },
+            "label_method": "average_future_return_3class",
             "image_lookback": int(image_lookback),
             "image_root": str(image_root),
         },

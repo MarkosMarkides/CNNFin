@@ -19,13 +19,12 @@ start_date: "2021-01-01T00:00:00Z"
 end_date: "2026-01-01T00:00:00Z"
 
 lookback: 96
-horizon: 96
+horizon: 12
 atr_window: 14
-barrier_multiple: 1.5
 class_names:
-  0: short
-  1: no_trade
-  2: long
+  0: down
+  1: neutral
+  2: up
 
 train_years: [2021, 2022, 2023]
 val_years: [2024]

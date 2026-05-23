@@ -37,7 +37,7 @@ class ExperimentConfig:
     horizon: int = 96
     atr_window: int = 14
     barrier_multiple: float = 1.5
-    class_names: dict[int, str] = field(default_factory=lambda: {0: "short", 1: "no_trade", 2: "long"})
+    class_names: dict[int, str] = field(default_factory=lambda: {0: "down", 1: "neutral", 2: "up"})
 
     train_years: list[int] = field(default_factory=lambda: [2021, 2022, 2023])
     val_years: list[int] = field(default_factory=lambda: [2024])
@@ -96,7 +96,7 @@ class ExperimentConfig:
 
 def _coerce_class_names(value: Any) -> dict[int, str]:
     if value is None:
-        return {0: "short", 1: "no_trade", 2: "long"}
+        return {0: "down", 1: "neutral", 2: "up"}
     return {int(k): str(v) for k, v in dict(value).items()}
 
 

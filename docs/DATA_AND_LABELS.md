@@ -54,7 +54,7 @@ It contains:
 - target-symbol aliases such as `BTCUSDT_Close`
 - altcoin close and volume columns
 - indicators from `IndicatorFactory.apply_all`
-- triple-barrier labels and barrier metadata
+- average-future-return labels and threshold metadata
 - split and sample metadata
 - validity flags
 
@@ -70,33 +70,41 @@ The image heatmap uses 13 configured indicator columns from this output. Those a
 
 ## Label Policy
 
-Each sample at time `t` uses the future 96 one-hour candles:
+Each sample at time `t` uses the future 12 one-hour closes:
 
 ```text
-[t+1, t+96]
+[t+1, t+12]
 ```
 
-Barriers are symmetric around `Close_t`:
+The target return is:
 
 ```text
-upper = Close_t + 1.5 * ATR_14_t
-lower = Close_t - 1.5 * ATR_14_t
+future_avg_close_t = mean(Close_{t+1}, ..., Close_{t+12})
+R_t = log(future_avg_close_t / Close_t)
 ```
+
+The lower and upper thresholds are fitted only on valid training candidates:
+
+```text
+theta_down = 33.33rd percentile of train R_t
+theta_up   = 66.67th percentile of train R_t
+```
+
+Those fixed thresholds are then applied unchanged to train, validation, and test.
 
 Classes:
 
-- `0 = short`: lower barrier is hit before the upper barrier
-- `1 = no_trade`: neither barrier is hit within the future horizon
-- `2 = long`: upper barrier is hit before the lower barrier
+- `0 = down`: `R_t < theta_down`
+- `1 = neutral`: `theta_down <= R_t <= theta_up`
+- `2 = up`: `R_t > theta_up`
 
-If upper and lower are both touched in the same future candle before any earlier hit, the row is marked ambiguous and excluded from modeling.
+This makes the training labels approximately balanced while keeping validation and test distributions honest.
 
 ## Sample Validity
 
 A row is a valid sample only if:
 
 - label exists
-- label is not ambiguous
 - split exists
 - required source features are present for the full model window
 - lookback window is continuous

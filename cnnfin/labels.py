@@ -7,9 +7,14 @@ from cnnfin.config import ExperimentConfig
 from cnnfin.utils import ensure_dir, write_json
 
 
-SHORT = 0
-NO_TRADE = 1
-LONG = 2
+DOWN = 0
+NEUTRAL = 1
+UP = 2
+
+# Backward-compatible aliases for the V1 triple-barrier implementation.
+SHORT = DOWN
+NO_TRADE = NEUTRAL
+LONG = UP
 
 
 def _atr(df: pd.DataFrame, window: int, *, high: str = "High", low: str = "Low", close: str = "Close") -> pd.Series:
@@ -111,16 +116,75 @@ def triple_barrier_3class(
     return out
 
 
+def average_future_return_3class(
+    df: pd.DataFrame,
+    *,
+    horizon: int,
+    train_mask: pd.Series | np.ndarray,
+    close_col: str = "Close",
+    theta_down: float | None = None,
+    theta_up: float | None = None,
+) -> pd.DataFrame:
+    """Three-class labels from train-fitted average future close returns.
+
+    The future target for row t is log(mean(Close[t+1:t+H]) / Close[t]).
+    Thresholds are fitted only from the supplied train mask when not provided.
+    """
+
+    out = df.copy()
+    close = out[close_col].astype(float)
+
+    future_sum = sum(close.shift(-step) for step in range(1, horizon + 1))
+    future_avg = future_sum / float(horizon)
+    future_return = np.log(future_avg / close)
+
+    out["future_avg_close"] = future_avg
+    out["future_avg_log_return"] = future_return
+
+    finite_returns = out["future_avg_log_return"].replace([np.inf, -np.inf], np.nan)
+    train_mask = pd.Series(train_mask, index=out.index).fillna(False).astype(bool)
+    fit_values = finite_returns.loc[train_mask & finite_returns.notna()]
+
+    if theta_down is None or theta_up is None:
+        if fit_values.empty:
+            raise ValueError("Cannot fit average-return thresholds: no finite train returns in train_mask.")
+        fitted = np.quantile(fit_values.to_numpy(dtype=float), [1.0 / 3.0, 2.0 / 3.0])
+        theta_down = float(fitted[0]) if theta_down is None else float(theta_down)
+        theta_up = float(fitted[1]) if theta_up is None else float(theta_up)
+    else:
+        theta_down = float(theta_down)
+        theta_up = float(theta_up)
+
+    if theta_down > theta_up:
+        raise ValueError(f"theta_down must be <= theta_up, got {theta_down} > {theta_up}")
+
+    labels = np.full(len(out), np.nan)
+    statuses: list[str] = ["unlabeled"] * len(out)
+
+    finite_mask = finite_returns.notna().to_numpy(dtype=bool)
+    labels[finite_mask] = NEUTRAL
+    labels[(finite_returns < theta_down).to_numpy(dtype=bool)] = DOWN
+    labels[(finite_returns > theta_up).to_numpy(dtype=bool)] = UP
+
+    for idx, is_finite in enumerate(finite_mask):
+        if is_finite:
+            statuses[idx] = "labeled"
+        else:
+            statuses[idx] = "insufficient_horizon"
+
+    out["label"] = labels
+    out["theta_down"] = theta_down
+    out["theta_up"] = theta_up
+    out["label_status"] = statuses
+    return out
+
+
 def build_label_table(config: ExperimentConfig) -> pd.DataFrame:
     from cnnfin.features import load_feature_table
 
     features = load_feature_table(config)
-    labels = triple_barrier_3class(
-        features,
-        horizon=config.horizon,
-        atr_window=config.atr_window,
-        barrier_multiple=config.barrier_multiple,
-    )
+    train_mask = features["split"].eq("train") & features.get("candidate_valid_sample", True)
+    labels = average_future_return_3class(features, horizon=config.horizon, train_mask=train_mask)
     ensure_dir(config.artifact_path("processed"))
     labels.to_pickle(config.artifact_path("processed", f"labels_{config.interval}.pkl"))
 
@@ -131,7 +195,11 @@ def build_label_table(config: ExperimentConfig) -> pd.DataFrame:
             "rows": int(len(labels)),
             "status_counts": {str(k): int(v) for k, v in status_counts.items()},
             "class_counts": {str(k): int(v) for k, v in class_counts.items()},
-            "ambiguous_excluded": int(status_counts.get("ambiguous_same_bar", 0)),
+            "label_method": "average_future_return_3class",
+            "price_basis": "Close",
+            "horizon": int(config.horizon),
+            "theta_down": float(labels["theta_down"].dropna().iloc[0]),
+            "theta_up": float(labels["theta_up"].dropna().iloc[0]),
             "insufficient_horizon_excluded": int(status_counts.get("insufficient_horizon", 0)),
         },
         config.artifact_path("reports", "label_report.json"),
@@ -143,4 +211,8 @@ def load_label_table(config: ExperimentConfig) -> pd.DataFrame:
     path = config.artifact_path("processed", f"labels_{config.interval}.pkl")
     if not path.exists():
         return build_label_table(config)
-    return pd.read_pickle(path)
+    labels = pd.read_pickle(path)
+    required_v2_cols = {"future_avg_close", "future_avg_log_return", "theta_down", "theta_up"}
+    if not required_v2_cols.issubset(labels.columns):
+        return build_label_table(config)
+    return labels

@@ -5,7 +5,7 @@ import pandas as pd
 
 from cnnfin.config import ExperimentConfig
 from cnnfin.data import load_aligned_market_data
-from cnnfin.labels import triple_barrier_3class
+from cnnfin.labels import average_future_return_3class
 from cnnfin.utils import ensure_dir, write_json
 from feature_engineering.indicators import IndicatorFactory
 
@@ -239,16 +239,18 @@ def _add_sample_validity_flags(df: pd.DataFrame, config: ExperimentConfig) -> pd
     required_sums = feature_prefix[idx[required_eligible] + 1] - feature_prefix[required_start[required_eligible]]
     required_features_present[required_eligible] = required_sums == model_lookback
     out["required_features_present"] = required_features_present
-    out["valid_sample"] = (
-        out["label"].notna()
-        & out["split"].notna()
-        & (out["label_status"] != "ambiguous_same_bar")
+    out["candidate_valid_sample"] = (
+        out["split"].notna()
         & out["required_features_present"]
         & out["lookback_continuous"]
         & out["horizon_continuous"]
         & out["lookback_same_split"]
         & out["horizon_same_split"]
     )
+    if "label" in out.columns:
+        out["valid_sample"] = out["candidate_valid_sample"] & out["label"].notna()
+    else:
+        out["valid_sample"] = False
     return out
 
 
@@ -302,17 +304,19 @@ def build_merged_df(config: ExperimentConfig) -> pd.DataFrame:
     )
     merged = merged.sort_values("Open time").reset_index(drop=True)
 
-    print("Building 3-class triple-barrier labels")
-    merged = triple_barrier_3class(
-        merged,
-        horizon=config.horizon,
-        atr_window=config.atr_window,
-        barrier_multiple=config.barrier_multiple,
-    )
     merged["row_idx"] = np.arange(len(merged), dtype=np.int64)
     merged["sample_id"] = merged["Open time"].map(_sample_id_from_timestamp)
     merged["year"] = merged["Open time"].dt.year.astype(int)
     merged["split"] = merged["year"].map(lambda y: _split_for_year(config, int(y)))
+    merged = _add_sample_validity_flags(merged, config)
+
+    print("Building 3-class average-future-return labels")
+    train_mask = merged["split"].eq("train") & merged["candidate_valid_sample"]
+    merged = average_future_return_3class(
+        merged,
+        horizon=config.horizon,
+        train_mask=train_mask,
+    )
     merged = _add_sample_validity_flags(merged, config)
 
     numeric_cols = [
@@ -348,6 +352,8 @@ def build_merged_df(config: ExperimentConfig) -> pd.DataFrame:
     status_counts = merged["label_status"].value_counts(dropna=False).to_dict()
     class_counts = merged["label"].dropna().astype(int).value_counts().sort_index().to_dict()
     valid_samples = merged[merged["valid_sample"]].copy()
+    theta_down = float(merged["theta_down"].dropna().iloc[0])
+    theta_up = float(merged["theta_up"].dropna().iloc[0])
     write_json(
         {
             "rows": int(len(merged)),
@@ -355,6 +361,11 @@ def build_merged_df(config: ExperimentConfig) -> pd.DataFrame:
             "model_feature_count": int(len(model_cols)),
             "image_indicators": config.image_indicators,
             "missing_image_indicators": missing_image_cols,
+            "label_method": "average_future_return_3class",
+            "label_price_basis": "Close",
+            "label_horizon": int(config.horizon),
+            "theta_down": theta_down,
+            "theta_up": theta_up,
             "label_status_counts": {str(k): int(v) for k, v in status_counts.items()},
             "class_counts": {str(k): int(v) for k, v in class_counts.items()},
             "valid_sample_rows": int(len(valid_samples)),
@@ -387,4 +398,8 @@ def load_feature_table(config: ExperimentConfig) -> pd.DataFrame:
     path = config.artifact_path("processed", f"features_{config.interval}.pkl")
     if not path.exists():
         return build_feature_table(config)
-    return pd.read_pickle(path)
+    df = pd.read_pickle(path)
+    required_v2_cols = {"future_avg_close", "future_avg_log_return", "theta_down", "theta_up", "candidate_valid_sample"}
+    if not required_v2_cols.issubset(df.columns):
+        return build_feature_table(config)
+    return df

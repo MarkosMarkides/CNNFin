@@ -6,7 +6,7 @@ CNNFin is organized as a staged pipeline. The notebooks are the Jarvis-friendly 
 
 1. `exploration/data_fetching.ipynb`
 2. `exploration/image_builder.ipynb`
-3. `exploration/ML_models.ipynb`
+3. `exploration/ML_models_regularized_variants.ipynb`
 4. `exploration/cnn_builder.ipynb`
 
 ## Data Flow
@@ -16,7 +16,7 @@ Binance 1h candles
   -> raw candle pickles
   -> aligned multi-symbol market table
   -> IndicatorFactory.apply_all indicators
-  -> triple-barrier labels
+  -> average-future-return labels
   -> valid samples
   -> four-panel PNG images
   -> ML baselines and CNN training
@@ -48,7 +48,7 @@ artifacts/cnnfin_1h/raw_zips/
 - forward-fills short altcoin gaps only
 - keeps BTC OHLC data strict because labels depend on BTC candles
 - applies `IndicatorFactory.apply_all`
-- builds triple-barrier labels
+- builds train-thresholded average-future-return labels
 - computes sample validity flags
 - saves `merged_df.pkl` and split sample pickles
 
@@ -94,12 +94,14 @@ artifacts/cnnfin_1h/processed/image_manifest.pkl
 
 ## Baseline Model Stage
 
-`ML_models.ipynb` trains:
+`ML_models_regularized_variants.ipynb` trains:
 
 - Logistic Regression
 - XGBoost
 - MLP
 - LSTM
+
+It evaluates both raw and window-normalized numeric input variants.
 
 It uses `image_manifest.pkl` as the sample source to guarantee the same sample IDs as the CNN.
 
@@ -128,4 +130,3 @@ Metrics include:
 - per-class precision, recall, and F1
 - confusion matrix
 - bootstrap confidence interval for test macro-F1
-

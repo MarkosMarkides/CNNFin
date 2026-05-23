@@ -21,7 +21,7 @@ Run all tests:
 
 Current tests cover:
 
-- triple-barrier label cases
+- average-future-return label cases
 - no future leakage in feature rows
 - image generator target-symbol exclusion
 - synthetic pipeline smoke build
@@ -129,6 +129,5 @@ Execution source of truth for Jarvis:
 
 - `exploration/data_fetching.ipynb`
 - `exploration/image_builder.ipynb`
-- `exploration/ML_models.ipynb`
+- `exploration/ML_models_regularized_variants.ipynb`
 - `exploration/cnn_builder.ipynb`
-

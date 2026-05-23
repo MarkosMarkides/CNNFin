@@ -37,8 +37,10 @@ def build_samples(config: ExperimentConfig) -> pd.DataFrame:
         "split",
         "label",
         "label_status",
-        "barrier_hit_step",
-        "barrier_hit_side",
+        "future_avg_close",
+        "future_avg_log_return",
+        "theta_down",
+        "theta_up",
         "lookback_continuous",
         "horizon_continuous",
         "lookback_same_split",
@@ -96,6 +98,9 @@ def load_samples(config: ExperimentConfig) -> pd.DataFrame:
     elif csv_path.exists():
         samples = pd.read_csv(csv_path)
     else:
+        return build_samples(config)
+    required_v2_cols = {"future_avg_close", "future_avg_log_return", "theta_down", "theta_up"}
+    if not required_v2_cols.issubset(samples.columns):
         return build_samples(config)
     samples["Open time"] = pd.to_datetime(samples["Open time"], utc=True)
     return samples

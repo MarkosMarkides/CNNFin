@@ -57,9 +57,8 @@ class PipelineSmokeTest(unittest.TestCase):
                 image_lookback=5,
                 horizon=4,
                 atr_window=14,
-                barrier_multiple=1.0,
                 image_size_each=24,
-                max_samples_per_split=3,
+                max_samples_per_split=30,
                 start_date="2021-01-01T00:00:00Z",
                 end_date="2026-01-01T00:00:00Z",
             )
@@ -86,8 +85,13 @@ class PipelineSmokeTest(unittest.TestCase):
                 "RSI_14",
                 "ATR_14",
                 "label",
+                "future_avg_close",
+                "future_avg_log_return",
+                "theta_down",
+                "theta_up",
                 "sample_id",
                 "split",
+                "candidate_valid_sample",
                 "required_features_present",
                 "valid_sample",
             ]:
@@ -100,6 +104,15 @@ class PipelineSmokeTest(unittest.TestCase):
             self.assertTrue(samples["lookback_same_split"].all())
             self.assertTrue(samples["horizon_same_split"].all())
             self.assertTrue(samples["required_features_present"].all())
+            self.assertEqual(set(merged.loc[merged["valid_sample"] & merged["split"].eq("train"), "label"].astype(int)), {0, 1, 2})
+            train_counts = (
+                merged.loc[merged["valid_sample"] & merged["split"].eq("train"), "label"]
+                .astype(int)
+                .value_counts()
+                .sort_index()
+            )
+            self.assertLessEqual(int(train_counts.max() - train_counts.min()), 1)
+            self.assertEqual(set(samples["label"].astype(int)), {0, 1, 2})
             expected_source_cols = [
                 "Open",
                 "High",
@@ -114,6 +127,7 @@ class PipelineSmokeTest(unittest.TestCase):
             self.assertEqual(feature_columns["sequence_feature_cols"], expected_source_cols)
             self.assertEqual(feature_columns["model_window_lookback"], config.image_lookback)
             self.assertEqual(set(manifest["split"]), {"train", "val", "test"})
+            self.assertEqual(set(manifest["label"].astype(int)), {0, 1, 2})
             self.assertTrue((manifest["image_lookback"] == 5).all())
             for image_path in manifest["image_path"]:
                 self.assertTrue(Path(image_path).exists())

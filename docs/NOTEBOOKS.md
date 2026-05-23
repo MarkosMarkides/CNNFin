@@ -6,7 +6,7 @@ Run notebooks in this order:
 
 1. `exploration/data_fetching.ipynb`
 2. `exploration/image_builder.ipynb`
-3. `exploration/ML_models.ipynb`
+3. `exploration/ML_models_regularized_variants.ipynb`
 4. `exploration/cnn_builder.ipynb`
 
 ## `data_fetching.ipynb`
@@ -33,7 +33,7 @@ Purpose:
 - load raw candles
 - build aligned market data
 - apply indicators
-- build triple-barrier labels
+- build average-future-return labels
 - build valid samples
 - save `merged_df.pkl`, `samples.pkl`, and split sample files
 - render preview images
@@ -44,6 +44,14 @@ Important toggle:
 ```python
 RUN_FULL_IMAGE_BUILD = False
 ```
+
+When switching from V1 artifacts, set this once before rebuilding:
+
+```python
+CLEAN_DERIVED_ARTIFACTS = True
+```
+
+This preserves raw candles and ZIP downloads, but removes stale processed files, images, model outputs, and result tables.
 
 For Jarvis full image generation, set:
 
@@ -63,7 +71,7 @@ Full images are saved to:
 artifacts/cnnfin_1h/images/
 ```
 
-## `ML_models.ipynb`
+## `ML_models_regularized_variants.ipynb`
 
 Purpose:
 
@@ -72,6 +80,7 @@ Purpose:
 - load `image_manifest.pkl`
 - build the exact same 30 one-hour candle numeric source windows used to create CNN images
 - train Logistic Regression, XGBoost, MLP, and LSTM
+- compare raw and window-normalized numeric variants
 - save metrics, predictions, confusion matrices, and model artifacts
 
 Important toggle:

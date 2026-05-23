@@ -73,6 +73,14 @@ First run with:
 RUN_FULL_IMAGE_BUILD = False
 ```
 
+If this workspace has old V1 triple-barrier artifacts, also set this once before rebuilding:
+
+```python
+CLEAN_DERIVED_ARTIFACTS = True
+```
+
+This removes `processed/`, `reports/`, `image_preview/`, `images/`, `results/`, and `models/`, while keeping `raw_candles/` and `raw_zips/`.
+
 Inspect the preview images.
 
 When ready for full training, set:
@@ -95,7 +103,7 @@ artifacts/cnnfin_1h/images/
 Open and run:
 
 ```text
-exploration/ML_models.ipynb
+exploration/ML_models_regularized_variants.ipynb
 ```
 
 Keep:
@@ -104,7 +112,7 @@ Keep:
 DEBUG_MODE = False
 ```
 
-The notebook trains Logistic Regression, XGBoost, MLP, and LSTM on the same sample IDs and same source information used by the CNN.
+The notebook trains Logistic Regression, XGBoost, MLP, and LSTM on the same sample IDs and same source information used by the CNN. It evaluates raw and window-normalized numeric variants.
 
 Expected outputs:
 
@@ -166,4 +174,3 @@ DEBUG_MODE = True
 ```
 
 Use this only to check that the notebook executes. Do not use debug outputs for research conclusions.
-

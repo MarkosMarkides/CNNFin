@@ -64,7 +64,7 @@ The 26 source features are:
 
 ## ML Baselines
 
-`exploration/ML_models.ipynb` trains:
+`exploration/ML_models_regularized_variants.ipynb` trains:
 
 - Logistic Regression
 - XGBoost
@@ -74,6 +74,8 @@ The 26 source features are:
 Logistic Regression, XGBoost, and MLP use a flattened `30 x 26` numeric vector.
 
 The LSTM uses a `30 x 26` sequence.
+
+The notebook evaluates both the raw numeric window and a window-normalized/return-transformed variant.
 
 All preprocessing is fit on training data only. Validation is used for model selection where applicable. Test metrics are computed after training is complete.
 

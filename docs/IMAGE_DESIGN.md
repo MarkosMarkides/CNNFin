@@ -28,7 +28,7 @@ This is controlled by:
 image_lookback: 30
 ```
 
-The supervised label still uses the future 96 one-hour candles after `t`.
+The supervised label uses the future 12 one-hour candles after `t`.
 
 ## Output Size
 

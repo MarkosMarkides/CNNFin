@@ -56,14 +56,14 @@ Model selection, early stopping, and hyperparameter decisions should use train a
 
 The primary metric is test macro-F1.
 
-Macro-F1 is used because the task is multi-class and class imbalance matters, especially for the `no_trade` class.
+Macro-F1 is used because the task is multi-class and each directional class should matter equally.
 
 ## Current Modeling Target
 
-The model predicts the triple-barrier label for a sample time `t`:
+The model predicts the average-future-return label for a sample time `t`:
 
-- `0 = short`
-- `1 = no_trade`
-- `2 = long`
+- `0 = down`
+- `1 = neutral`
+- `2 = up`
 
-The label uses the future 96 one-hour candles after `t`; model inputs use only data at or before `t`.
+The label uses the mean future close over the next 12 one-hour candles. Train-only 33rd and 66th percentile thresholds convert the future average log return into the three classes. Model inputs use only data at or before `t`.

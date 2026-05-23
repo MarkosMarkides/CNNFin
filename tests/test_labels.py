@@ -3,55 +3,83 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cnnfin.labels import LONG, NO_TRADE, SHORT, triple_barrier_3class
+from cnnfin.labels import DOWN, NEUTRAL, UP, average_future_return_3class
 
 
-def frame(highs, lows):
-    n = len(highs)
+def frame(closes):
+    n = len(closes)
     return pd.DataFrame(
         {
             "Open time": pd.date_range("2021-01-01", periods=n, freq="1h", tz="UTC"),
-            "Open": [100.0] * n,
-            "High": highs,
-            "Low": lows,
-            "Close": [100.0] * n,
+            "Open": closes,
+            "High": [value + 1.0 for value in closes],
+            "Low": [value - 1.0 for value in closes],
+            "Close": closes,
             "Volume": [1.0] * n,
-            "ATR_14": [10.0] * n,
         }
     )
 
 
-class TripleBarrier3ClassTest(unittest.TestCase):
-    def test_upper_hit_first_is_long(self):
-        df = frame([101, 116, 101, 101], [99, 95, 99, 99])
-        out = triple_barrier_3class(df, horizon=3, atr_window=14, barrier_multiple=1.5)
-        self.assertEqual(int(out.loc[0, "label"]), LONG)
-        self.assertEqual(out.loc[0, "label_status"], "upper_hit")
-        self.assertEqual(int(out.loc[0, "barrier_hit_step"]), 1)
+class AverageFutureReturn3ClassTest(unittest.TestCase):
+    def test_positive_future_average_is_up(self):
+        df = frame([100.0, 102.0, 103.0, 104.0])
+        out = average_future_return_3class(
+            df,
+            horizon=3,
+            train_mask=[True, False, False, False],
+            theta_down=-0.01,
+            theta_up=0.01,
+        )
+        self.assertEqual(int(out.loc[0, "label"]), UP)
+        self.assertEqual(out.loc[0, "label_status"], "labeled")
+        self.assertAlmostEqual(float(out.loc[0, "future_avg_close"]), 103.0)
 
-    def test_lower_hit_first_is_short(self):
-        df = frame([101, 104, 101, 101], [99, 84, 99, 99])
-        out = triple_barrier_3class(df, horizon=3, atr_window=14, barrier_multiple=1.5)
-        self.assertEqual(int(out.loc[0, "label"]), SHORT)
-        self.assertEqual(out.loc[0, "label_status"], "lower_hit")
+    def test_negative_future_average_is_down(self):
+        df = frame([100.0, 98.0, 97.0, 96.0])
+        out = average_future_return_3class(
+            df,
+            horizon=3,
+            train_mask=[True, False, False, False],
+            theta_down=-0.01,
+            theta_up=0.01,
+        )
+        self.assertEqual(int(out.loc[0, "label"]), DOWN)
 
-    def test_neither_hit_is_no_trade(self):
-        df = frame([101, 104, 108, 110], [99, 96, 94, 91])
-        out = triple_barrier_3class(df, horizon=3, atr_window=14, barrier_multiple=1.5)
-        self.assertEqual(int(out.loc[0, "label"]), NO_TRADE)
-        self.assertEqual(out.loc[0, "label_status"], "no_hit")
-
-    def test_same_bar_double_hit_is_ambiguous(self):
-        df = frame([101, 116, 101, 101], [99, 84, 99, 99])
-        out = triple_barrier_3class(df, horizon=3, atr_window=14, barrier_multiple=1.5)
-        self.assertTrue(np.isnan(out.loc[0, "label"]))
-        self.assertEqual(out.loc[0, "label_status"], "ambiguous_same_bar")
+    def test_middle_future_average_is_neutral(self):
+        df = frame([100.0, 100.1, 99.9, 100.0])
+        out = average_future_return_3class(
+            df,
+            horizon=3,
+            train_mask=[True, False, False, False],
+            theta_down=-0.01,
+            theta_up=0.01,
+        )
+        self.assertEqual(int(out.loc[0, "label"]), NEUTRAL)
 
     def test_insufficient_horizon_is_unlabeled(self):
-        df = frame([101, 101, 101, 101], [99, 99, 99, 99])
-        out = triple_barrier_3class(df, horizon=3, atr_window=14, barrier_multiple=1.5)
+        df = frame([100.0, 101.0, 102.0, 103.0])
+        out = average_future_return_3class(
+            df,
+            horizon=3,
+            train_mask=[True, False, False, False],
+            theta_down=-0.01,
+            theta_up=0.01,
+        )
         self.assertTrue(np.isnan(out.loc[1, "label"]))
         self.assertEqual(out.loc[1, "label_status"], "insufficient_horizon")
+
+    def test_thresholds_are_fit_from_train_mask_only(self):
+        df = frame([100.0, 90.0, 100.0, 110.0, 130.0, 100.0, 200.0, 300.0, 400.0])
+        train_mask = [True, True, True, False, False, False, False, False, False]
+        out = average_future_return_3class(df, horizon=1, train_mask=train_mask)
+
+        expected_train_returns = np.log(np.array([90.0 / 100.0, 100.0 / 90.0, 110.0 / 100.0]))
+        expected_down, expected_up = np.quantile(expected_train_returns, [1.0 / 3.0, 2.0 / 3.0])
+        self.assertAlmostEqual(float(out["theta_down"].iloc[0]), float(expected_down))
+        self.assertAlmostEqual(float(out["theta_up"].iloc[0]), float(expected_up))
+        self.assertEqual(int(out.loc[0, "label"]), DOWN)
+        self.assertEqual(int(out.loc[1, "label"]), UP)
+        self.assertEqual(int(out.loc[2, "label"]), NEUTRAL)
 
 
 if __name__ == "__main__":

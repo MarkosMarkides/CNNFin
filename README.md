@@ -6,7 +6,7 @@ The research question is:
 
 > If market data is represented as structured images instead of only numerical features, can a CNN improve 3-class BTCUSDT directional prediction versus classical numeric ML baselines?
 
-The experiment predicts 1-hour BTCUSDT triple-barrier outcomes using Binance candles from 2021 through 2025. The primary metric is test macro-F1 on the untouched 2025 test set.
+The experiment predicts 1-hour BTCUSDT average-future-return direction using Binance candles from 2021 through 2025. The primary metric is test macro-F1 on the untouched 2025 test set.
 
 ## Current Experiment
 
@@ -19,10 +19,10 @@ The experiment predicts 1-hour BTCUSDT triple-barrier outcomes using Binance can
   - Validation: 2024
   - Test: 2025
 - Label classes:
-  - `0 = short`
-  - `1 = no_trade`
-  - `2 = long`
-- Label policy: 96 one-hour candles with symmetric `1.5 * ATR_14` barriers.
+  - `0 = down`
+  - `1 = neutral`
+  - `2 = up`
+- Label policy: 12 one-hour future average close return, with train-only 33rd/66th percentile thresholds.
 - Image window: previous 30 one-hour candles.
 - Model/sample lookback for numeric baselines: the same 30-candle image source window.
 
@@ -45,18 +45,20 @@ Run the notebooks in this order:
 
 1. `exploration/data_fetching.ipynb`
 2. `exploration/image_builder.ipynb`
-3. `exploration/ML_models.ipynb`
+3. `exploration/ML_models_regularized_variants.ipynb`
 4. `exploration/cnn_builder.ipynb`
 
 `image_builder.ipynb` has `RUN_FULL_IMAGE_BUILD = False` by default. Set it to `True` on Jarvis when you are ready to generate the full image dataset.
 
-`ML_models.ipynb` and `cnn_builder.ipynb` have `DEBUG_MODE = False` by default. Set `DEBUG_MODE = True` only for quick smoke tests.
+When rebuilding from the old V1 triple-barrier target, set `CLEAN_DERIVED_ARTIFACTS = True` once in `image_builder.ipynb`. This keeps raw candles but removes stale processed files, images, models, and results.
+
+`ML_models_regularized_variants.ipynb` and `cnn_builder.ipynb` have `DEBUG_MODE = False` by default. Set `DEBUG_MODE = True` only for quick smoke tests.
 
 ## What Each Stage Produces
 
 - `data_fetching.ipynb`: downloads raw Binance candles into `artifacts/cnnfin_1h/raw_candles/`.
 - `image_builder.ipynb`: builds `merged_df.pkl`, `samples.pkl`, split sample pickles, preview images, and optionally the full image dataset plus `image_manifest.pkl`.
-- `ML_models.ipynb`: trains Logistic Regression, XGBoost, MLP, and LSTM on the exact numeric source windows used by the CNN images.
+- `ML_models_regularized_variants.ipynb`: trains Logistic Regression, XGBoost, MLP, and LSTM on the exact numeric source windows used by the CNN images.
 - `cnn_builder.ipynb`: trains EfficientNet-B0 on the generated four-panel PNG images.
 
 Main outputs are written under `artifacts/cnnfin_1h/`.
